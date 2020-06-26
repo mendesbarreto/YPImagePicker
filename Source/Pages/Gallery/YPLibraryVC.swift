@@ -438,7 +438,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                                           duration: YPConfig.video.trimmerMaxDuration,
                                           callback: callback)
         } else {
-            checkVideoLengthAndCrop(for: asset, withCropRect: resultCropRect, callback: callback)
+            checkVideoLengthAndCrop(for: asset,
+                                    withCropRect: resultCropRect,
+                                    callback: callback)
         }
     }
 
@@ -477,11 +479,11 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             if self.multipleSelectionEnabled && self.selection.count > 1 {
 
                 // Check video length
-                for asset in selectedAssets {
-                    if self.fitsVideoLengthLimits(asset: asset.asset) == false {
-                        return
-                    }
-                }
+//                for asset in selectedAssets {
+//                    if self.fitsVideoLengthLimits(asset: asset.asset) == false {
+//                        return
+//                    }
+//                }
 
                 // Fill result media items array
                 var resultMediaItems: [YPMediaItem] = []
