@@ -499,7 +499,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                         }
 
                     case .video:
-                        self.checkVideoLengthAndCrop(for: asset.asset, withCropRect: asset.cropRect) { videoURL in
+                        self.fetchVideoAndApplyVideoSettings(for: asset.asset,
+                                                             withCropRect: asset.cropRect) { videoURL in
                             if let videoURL = videoURL {
                                 let videoItem = YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
                                                              videoURL: videoURL, asset: asset.asset)
@@ -524,7 +525,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                 case .audio, .unknown:
                     return
                 case .video:
-                    self.checkVideoLengthAndCrop(for: asset, callback: { videoURL in
+                    self.fetchVideoAndApplyVideoSettings(for: asset, callback: { videoURL in
                         DispatchQueue.main.async {
                             if let videoURL = videoURL {
                                 self.delegate?.libraryViewFinishedLoading()
