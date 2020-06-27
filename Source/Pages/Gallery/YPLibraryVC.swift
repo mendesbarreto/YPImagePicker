@@ -420,9 +420,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         mediaManager.imageManager?.fetchImage(for: asset, cropRect: cropRect, targetSize: ts, callback: callback)
     }
 
-    private func fetchVideoAndApplyVideoSettings(for asset: PHAsset,
-                                                withCropRect rect: CGRect? = nil,
-                                                callback: @escaping (_ videoURL: URL?) -> Void) {
+    private func fetchVideoAndApplySettings(for asset: PHAsset,
+                                            withCropRect rect: CGRect? = nil,
+                                            callback: @escaping (_ videoURL: URL?) -> Void) {
         let normalizedCropRect = rect ?? DispatchQueue.main.sync { v.currentCropRect() }
         let ts = targetSize(for: asset, cropRect: normalizedCropRect)
         let xCrop: CGFloat = normalizedCropRect.origin.x * CGFloat(asset.pixelWidth)
@@ -432,24 +432,18 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                                     width: ts.width,
                                     height: ts.height)
 
+        guard fitsVideoLengthLimits(asset: asset) else {
+            return
+        }
+
         if YPConfig.video.automaticTrimToTrimmerMaxDuration {
             fetchVideoAndCropWithDuration(for: asset,
                                           withCropRect: resultCropRect,
                                           duration: YPConfig.video.trimmerMaxDuration,
                                           callback: callback)
         } else {
-            checkVideoLengthAndCrop(for: asset,
-                                    withCropRect: resultCropRect,
-                                    callback: callback)
-        }
-    }
-
-    private func checkVideoLengthAndCrop(for asset: PHAsset,
-                                         withCropRect rect: CGRect,
-                                         callback: @escaping (_ videoURL: URL?) -> Void) {
-        if fitsVideoLengthLimits(asset: asset) == true {
             delegate?.libraryViewDidTapNext()
-            mediaManager.fetchVideoUrlAndCrop(for: asset, cropRect: rect, callback: callback)
+            mediaManager.fetchVideoUrlAndCrop(for: asset, cropRect: resultCropRect, callback: callback)
         }
     }
 
@@ -479,11 +473,11 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             if self.multipleSelectionEnabled && self.selection.count > 1 {
 
                 // Check video length
-//                for asset in selectedAssets {
-//                    if self.fitsVideoLengthLimits(asset: asset.asset) == false {
-//                        return
-//                    }
-//                }
+                for asset in selectedAssets {
+                    if self.fitsVideoLengthLimits(asset: asset.asset) == false {
+                        return
+                    }
+                }
 
                 // Fill result media items array
                 var resultMediaItems: [YPMediaItem] = []
@@ -501,7 +495,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                         }
 
                     case .video:
-                        self.fetchVideoAndApplyVideoSettings(for: asset.asset,
+                        self.fetchVideoAndApplySettings(for: asset.asset,
                                                              withCropRect: asset.cropRect) { videoURL in
                             if let videoURL = videoURL {
                                 let videoItem = YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
@@ -527,7 +521,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                 case .audio, .unknown:
                     return
                 case .video:
-                    self.fetchVideoAndApplyVideoSettings(for: asset, callback: { videoURL in
+                    self.fetchVideoAndApplySettings(for: asset, callback: { videoURL in
                         DispatchQueue.main.async {
                             if let videoURL = videoURL {
                                 self.delegate?.libraryViewFinishedLoading()
