@@ -452,7 +452,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                                                duration: Double,
                                                callback: @escaping (_ videoURL: URL?) -> Void) {
         delegate?.libraryViewDidTapNext()
-        let timeDuration = CMTimeMakeWithSeconds(duration, preferredTimescale: Int32(NSEC_PER_SEC))
+        let timeDuration = CMTimeMakeWithSeconds(duration, preferredTimescale: 1000)
         mediaManager.fetchVideoUrlAndCropWithDuration(for: asset,
                                                       cropRect: rect,
                                                       duration: timeDuration,
